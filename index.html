@@ -25,9 +25,8 @@
             const [state, setState] = React.useState({
                 map:null,
             });
-            const mapDivRef = React.useRef(document.getElementById('map'));
-            const map = React.useRef(null);
-            React.useEffect(() => {map.current = state.map}, [state.map]);
+            const mapDivRef = React.useRef();
+            const mapRef = React.useRef();            
             const markers = []
             const routes = []
             var renderers = []
@@ -36,11 +35,13 @@
 
             function initMap() {
                 // Initialize the map
-                map.current = new google.maps.Map(mapDivRef.current, {
+                console.log(0)
+                const map = new google.maps.Map(mapDivRef.current, {
                     center: {lat: -31.94513, lng: 115.84105},
                     zoom: 12,
                     streetViewControl: false,
                 });
+                console.log(1)
 
                 directionsService = new google.maps.DirectionsService()
 
@@ -48,13 +49,36 @@
                 addMarker({lat: -32.01325554689639, lng: 115.75319795732274})
 
                 //add new marker when user clicks on map
-                google.maps.event.addListener(map.current, 'click', function(event) {
+                google.maps.event.addListener(mapRef.current, 'click', function(event) {
                     addMarker(event.latLng)
                     //markers.forEach(x=>console.log(x.position.lat(), x.position.lng()))
                 });
 
                 mapDivRef.current.style.height = '40vh'
             }
+            
+            function addMarker(position=map.getCenter()) {
+                var marker = new google.maps.Marker({
+                    map: mapRef.current,
+                    position: position,
+                    draggable: true,
+                });
+
+                // Update the marker position when the user drags it
+                google.maps.event.addListener(marker, 'dragend', function() {
+                    //marker.position = marker.getPosition();
+                    console.log(marker.position.lat(), marker.position.lng())
+                });
+
+                google.maps.event.addListener(marker, 'click', function() {
+                    //removeMarker(marker)
+                })
+                
+                markers.push(marker)
+            }
+
+            React.useEffect(initMap,[])
+
 /*
 
             function calculateRoute(origin,destination) {
@@ -101,25 +125,6 @@
                 renderers = []
             }
 
-            function addMarker(position=map.getCenter()) {
-                var marker = new google.maps.Marker({
-                    map: map,
-                    position: position,
-                    draggable: true,
-                });
-
-                // Update the marker position when the user drags it
-                google.maps.event.addListener(marker, 'dragend', function() {
-                    //marker.position = marker.getPosition();
-                    console.log(marker.position.lat(), marker.position.lng())
-                });
-
-                google.maps.event.addListener(marker, 'click', function() {
-                    removeMarker(marker)
-                })
-                
-                markers.push(marker)
-            }
 
             function removeMarker(marker){
                 markers.splice(markers.indexOf(marker),1)
@@ -146,7 +151,6 @@
             }
 */
             
-            React.useEffect(initMap,[])
             function calculateOptimalLocation(){}
             function calculateAllRoutes(){}
             function removeRenderers(){}
@@ -162,7 +166,7 @@
                         <button onClick={calculateOptimalLocation}>Calculate Optimal Location</button>
                         <button onClick={calculateAllRoutes}>Calculate All Routes</button>
                         <button onClick={removeRenderers}>Remove Renderers</button>
-                        <div id="map"></div>
+                        <div ref={mapDivRef}></div>
                     </main>
                 </div>
             )
