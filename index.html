@@ -125,8 +125,8 @@
             }
 
             function removeMarker(marker){
-                markers.splice(markers.indexOf(marker))
-                marker.map = null
+                markers.splice(markers.indexOf(marker),1)
+                marker.setMap(null)
             }
 
             function calculateAllRoutes() {
