@@ -15,32 +15,28 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNpV7eq4zRWLwunS7_qe88yyuoiWKMyj0&libraries=places&loading=async"> </script>
 </head>
 <body>
-    <header>
-        <h1>Gatho</h1>
-        <h4>Optimal Gathering Location</h4>
-    </header>
+    <div id="app"></div>
 
-    <main>
-        <button onclick="calculateOptimalLocation()">Calculate Optimal Location</button>
-        <button onclick="calculateAllRoutes()">Calculate All Routes</button>
-        <button onclick="removeRenderers()">Remove Renderers</button>
-
-        <div id="optimalLocation"></div>
-        <div id="map"></div>
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNpV7eq4zRWLwunS7_qe88yyuoiWKMyj0&libraries=places&loading=async"> </script>
-        <script>
+    <script type="text/babel">
+        function App() {
+            const [state, setState] = React.useState({
+                map:null,
+            });
+            const mapDivRef = React.useRef(document.getElementById('map'));
+            const map = React.useRef(null);
+            React.useEffect(() => {map.current = state.map}, [state.map]);
             const markers = []
             const routes = []
-            const renderers = []
+            var renderers = []
             const key = 'AIzaSyBNpV7eq4zRWLwunS7_qe88yyuoiWKMyj0'
-            var map
             var directionsService
 
             function initMap() {
                 // Initialize the map
-                map = new google.maps.Map(document.getElementById('map'), {
+                map.current = new google.maps.Map(mapDivRef.current, {
                     center: {lat: -31.94513, lng: 115.84105},
                     zoom: 12,
                     streetViewControl: false,
@@ -52,13 +48,14 @@
                 addMarker({lat: -32.01325554689639, lng: 115.75319795732274})
 
                 //add new marker when user clicks on map
-                google.maps.event.addListener(map, 'click', function(event) {
+                google.maps.event.addListener(map.current, 'click', function(event) {
                     addMarker(event.latLng)
                     //markers.forEach(x=>console.log(x.position.lat(), x.position.lng()))
                 });
 
-                document.getElementById('map').style.height = '40vh'
+                mapDivRef.current.style.height = '40vh'
             }
+/*
 
             function calculateRoute(origin,destination) {
                 var request = {
@@ -92,9 +89,9 @@
                     map: map,
                     directions: route,
                     draggable: true,
-                    /*polylineOptions: {
-                        strokeColor: 'red'
-                    }*/
+                    //polylineOptions: {
+                    //    strokeColor: 'red'
+                    //}
                 });
                 renderers.push(renderer)
             }
@@ -147,12 +144,33 @@
                 console.log(origin,destination)
                 calculateRoute(origin,destination)
             }
+*/
             
-            initMap()
-        </script>
-    </main>
+            React.useEffect(initMap,[])
+            function calculateOptimalLocation(){}
+            function calculateAllRoutes(){}
+            function removeRenderers(){}
+            return
+            (
+                <div>
+                    <header>
+                        <h1>Gatho</h1>
+                        <h4>Optimal Gathering Location</h4>
+                    </header>
 
- 
+                    <main>
+                        <button onClick={calculateOptimalLocation}>Calculate Optimal Location</button>
+                        <button onClick={calculateAllRoutes}>Calculate All Routes</button>
+                        <button onClick={removeRenderers}>Remove Renderers</button>
+                        <div id="map"></div>
+                    </main>
+                </div>
+            )
+        }
+        ReactDOM.render(<App />, document.querySelector("#app"));
+    </script>
+
+
 </body>
 </html>
 
