@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gatho - Optimal Gathering Location</title>
+    <!-- Add necessary CSS and JavaScript files here -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Gatho</h1>
+        <h4>Optimal Gathering Location</h4>
+    </header>
+
+    <main>
+        <button onclick="calculateOptimalLocation()">Calculate Optimal Location</button>
+        <button onclick="calculateAllRoutes()">Calculate All Routes</button>
+        <button onclick="removeRenderers()">Remove Renderers</button>
+
+        <div id="optimalLocation"></div>
+        <div id="map"></div>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNpV7eq4zRWLwunS7_qe88yyuoiWKMyj0&libraries=places&loading=async"> </script>
+        <script>
+            const markers = []
+            const routes = []
+            const renderers = []
+            const key = 'AIzaSyBNpV7eq4zRWLwunS7_qe88yyuoiWKMyj0'
+            var map
+            var directionsService
+
+            function initMap() {
+                // Initialize the map
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: {lat: -31.94513, lng: 115.84105},
+                    zoom: 12,
+                    streetViewControl: false,
+                });
+
+                directionsService = new google.maps.DirectionsService()
+
+                addMarker()
+                addMarker({lat: -32.01325554689639, lng: 115.75319795732274})
+
+                //add new marker when user clicks on map
+                google.maps.event.addListener(map, 'click', function(event) {
+                    addMarker(event.latLng)
+                    //markers.forEach(x=>console.log(x.position.lat(), x.position.lng()))
+                });
+
+                document.getElementById('map').style.height = '40vh'
+            }
+
+            function calculateRoute(origin,destination) {
+                var request = {
+                    origin: origin,
+                    destination: destination,
+                    travelMode: 'DRIVING',
+                    unitSystem: google.maps.UnitSystem.METRIC
+                };
+                directionsService.route(request, function(route, status) {
+                    if (status == 'OK') {
+                        addRenderer(route)
+                        addRoute(origin,destination,route)
+                    }
+                });
+            }
+
+            function latLngToString(latLng) {
+                return latLng.lat() + ',' + latLng.lng()
+            }
+
+            function addRoute(origin,destination,route){
+                console.log(route)
+                if (!(latLngToString(origin) in route)){
+                    routes[latLngToString(origin)] = {}
+                }
+                routes[latLngToString(origin)][latLngToString(destination)] = route
+            }
+
+            function addRenderer(route) {
+                var renderer = new google.maps.DirectionsRenderer({
+                    map: map,
+                    directions: route,
+                    draggable: true,
+                    polylineOptions: {
+                        strokeColor: 'red'
+                    }
+                });
+                renderers.push(renderer)
+            }
+
+            function removeRenderers() {
+                renderers.forEach(renderer => renderer.setMap(null))
+                renderers = []
+            }
+
+            function addMarker(position=map.getCenter()) {
+                var marker = new google.maps.Marker({
+                    map: map,
+                    position: position,
+                    draggable: true,
+                });
+
+                // Update the marker position when the user drags it
+                google.maps.event.addListener(marker, 'dragend', function() {
+                    //marker.position = marker.getPosition();
+                    console.log(marker.position.lat(), marker.position.lng())
+                });
+                
+                markers.push(marker)
+            }
+
+            function calculateAllRoutes() {
+                const positions = markers.map(marker => marker.position)
+                positions.forEach(origin => {
+                    positions.forEach(destination => {
+                        if (origin !== destination) {
+                            calculateRoute(origin,destination)
+                        }
+                    })
+                })
+            }
+
+            function calculateOptimalLocation() {
+                const positions = markers.map(marker => marker.position)
+                origin = positions[0]
+                destination = positions[1]
+                console.log(origin,destination)
+                calculateRoute(origin,destination)
+            }
+            
+            initMap()
+        </script>
+    </main>
+
+ 
+</body>
+</html>
+
