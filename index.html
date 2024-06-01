@@ -27,7 +27,7 @@
         <button onclick="calculateAllRoutes()">Calculate All Routes</button>
         <button onclick="removeRenderers()">Remove Renderers</button>
 
-        <div id="optimalLocation"></div>
+        <div id="array-container"></div>
         <div id="map"></div>
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNpV7eq4zRWLwunS7_qe88yyuoiWKMyj0&libraries=places&loading=async"> </script>
         <script>
@@ -122,11 +122,13 @@
                 })
                 
                 markers.push(marker)
+                renderMarkersList()
             }
 
             function removeMarker(marker){
                 markers.splice(markers.indexOf(marker),1)
                 marker.setMap(null)
+                renderMarkersList()
             }
 
             function calculateAllRoutes() {
@@ -146,6 +148,16 @@
                 destination = positions[1]
                 console.log(origin,destination)
                 calculateRoute(origin,destination)
+            }
+
+            function renderMarkersList() {
+                const container = document.getElementById('array-container');
+                container.innerHTML = ''; // Clear the container
+                markers.forEach((item, index) => {
+                    const element = document.createElement('div');
+                    element.innerText = latLngToString(item.position);
+                    container.appendChild(element);
+                });                    
             }
             
             initMap()
