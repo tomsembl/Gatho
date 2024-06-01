@@ -11,10 +11,25 @@
             margin: 0;
             padding: 0;
         }
+        #markersList{
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-height: 20vh;
+            max-width: 400px;
+            overflow-y: auto;
+        }
+        #markersList > div {
+            margin: 5px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
     </style>
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <!-- <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script> -->
 </head>
 <body>
     <header>
@@ -27,7 +42,7 @@
         <button onclick="calculateAllRoutes()">Calculate All Routes</button>
         <button onclick="removeRenderers()">Remove Renderers</button>
 
-        <div id="array-container"></div>
+        <div id="markersList"></div>
         <div id="map"></div>
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNpV7eq4zRWLwunS7_qe88yyuoiWKMyj0&libraries=places&loading=async"> </script>
         <script>
@@ -61,6 +76,9 @@
             }
 
             function calculateRoute(origin,destination) {
+                if (getRoute(origin,destination) !== undefined) {
+                    return
+                }
                 var request = {
                     origin: origin,
                     destination: destination,
@@ -87,6 +105,13 @@
                 routes[latLngToString(origin)][latLngToString(destination)] = route
             }
 
+            function getRoute(origin,destination){
+                if (routes[latLngToString(origin)] === undefined) {
+                    return undefined
+                }
+                return routes[latLngToString(origin)][latLngToString(destination)]
+            }
+
             function addRenderer(route) {
                 var renderer = new google.maps.DirectionsRenderer({
                     map: map,
@@ -101,7 +126,7 @@
 
             function removeRenderers() {
                 renderers.forEach(renderer => renderer.setMap(null))
-                renderers = []
+                renderers.length = 0
             }
 
             function addMarker(position=map.getCenter()) {
@@ -120,6 +145,8 @@
                 google.maps.event.addListener(marker, 'click', function() {
                     removeMarker(marker)
                 })
+
+                marker.label = latLngToString(marker.position)
                 
                 markers.push(marker)
                 renderMarkersList()
@@ -151,7 +178,7 @@
             }
 
             function renderMarkersList() {
-                const container = document.getElementById('array-container');
+                const container = document.getElementById('markersList');
                 container.innerHTML = ''; // Clear the container
                 markers.forEach((item, index) => {
                     const element = document.createElement('div');
@@ -159,7 +186,6 @@
                     container.appendChild(element);
                 });                    
             }
-            
             initMap()
         </script>
     </main>
